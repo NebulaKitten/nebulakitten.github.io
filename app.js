@@ -1,27 +1,42 @@
 // ====== SUPABASE CONFIGURATION ======
-const SUPABASE_URL = 'YOUR_SUPABASE_URL';
-const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+const SUPABASE_URL = 'https://baeclleekyftgvnlqyts.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJhZWNsbGVla3lmdGd2bmxxeXRzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxMzc0OTgsImV4cCI6MjA5NTcxMzQ5OH0.qoFHZ7m813hr1hFZ9oH_89k-75wqep6oS3mY28yGCs4';
 
 let supabase;
 
 try {
-    // Check if placeholders are still present
-    if (SUPABASE_URL.startsWith('YOUR_') || SUPABASE_ANON_KEY.startsWith('YOUR_') || !SUPABASE_URL) {
-        console.warn("⚠️ Nebula Kitten Config: Using offline demo mode because Supabase keys are placeholders.");
-        // Create a fake mock object so functions don't crash when clicked
-        supabase = {
-            from: () => ({
-                select: () => ({ not: () => ({ order: () => Promise.resolve({ data: [] }) }), order: () => Promise.resolve({ data: [] }) }),
-                insert: () => Promise.resolve({ error: null }),
-                update: () => ({ eq: () => Promise.resolve({ error: null }) })
-            })
-        };
-    } else {
-        // Initialize real client if keys look real
+    // 1. Check if the Supabase CDN script actually loaded in the HTML
+    if (typeof window.supabase === 'undefined') {
+        console.warn("⚠️ Nebula Kitten Warning: Supabase CDN script is missing from index.html! Running in offline demo mode.");
+        createMockSupabase();
+    } 
+    // 2. Check if you are still using placeholder keys
+    else if (SUPABASE_URL.startsWith('YOUR_') || !SUPABASE_URL) {
+        console.warn("   Nebula Kitten Config: Keys are placeholders. Running in offline demo mode.");
+        createMockSupabase();
+    } 
+    // 3. Excellent, everything is present! Initialize real cloud connection.
+    else {
         supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        console.log("🌌 Nebula Kitten: Cloud database connected successfully.");
     }
-} catch (configError) {
-    console.error("🚀 Matrix initialization caught an error:", configError.message);
+} catch (err) {
+    console.error("Initialization error:", err.message);
+    createMockSupabase();
+}
+
+// Fallback generator to keep the UI working even without database keys
+function createMockSupabase() {
+    supabase = {
+        from: () => ({
+            select: () => ({ 
+                not: () => ({ order: () => Promise.resolve({ data: [] }) }), 
+                order: () => Promise.resolve({ data: [] }) 
+            }),
+            insert: () => Promise.resolve({ error: null }),
+            update: () => ({ eq: () => Promise.resolve({ error: null }) })
+        })
+    };
 }
 
 // ====== APPLICATION RUNTIME STATE ======
@@ -29,6 +44,19 @@ let state = {
     currentUser: null,
     activeChallenge: null
 };
+
+// ====== EXPLICIT GLOBAL BINDING ======
+// Force the browser to see showPage even if there are script loading delays
+window.showPage = showPage;
+window.toggleAuthMode = toggleAuthMode;
+window.handleLogin = handleLogin;
+window.handleSignup = handleSignup;
+window.logout = logout;
+window.submitChallengeSolution = submitChallengeSolution;
+window.adminCreateChallenge = adminCreateChallenge;
+window.evaluateSubmission = evaluateSubmission;
+
+// ... Your remaining functions (showPage, handleLogin, etc.) stay exactly the same below ...
 
 // ... the rest of your app.js code continues below normally ...
 
