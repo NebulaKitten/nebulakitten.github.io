@@ -1,31 +1,36 @@
 // ====== SUPABASE CONFIGURATION ======
-// Replace these coordinates with your actual Supabase Project API credentials
-const SUPABASE_URL = 'https://baeclleekyftgvnlqyts.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJhZWNsbGVla3lmdGd2bmxxeXRzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxMzc0OTgsImV4cCI6MjA5NTcxMzQ5OH0.qoFHZ7m813hr1hFZ9oH_89k-75wqep6oS3mY28yGCs4';
-
-
-
-
-
+const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
 
 let supabase;
 
-// This safety check prevents the script from crashing if keys are blank placeholders
-if (SUPABASE_URL.startsWith('YOUR_') || SUPABASE_ANON_KEY.startsWith('YOUR_')) {
-    console.warn("⚠️ Nebula Kitten Warning: Supabase credentials missing. Cloud operations will fail, but local navigation will work!");
-    // Dummy fallback object so the rest of your functions don't throw syntax errors
-    supabase = { from: () => ({ select: () => ({ order: () => ({}) }), insert: () => ({}) }) };
-} else {
-    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+try {
+    // Check if placeholders are still present
+    if (SUPABASE_URL.startsWith('YOUR_') || SUPABASE_ANON_KEY.startsWith('YOUR_') || !SUPABASE_URL) {
+        console.warn("⚠️ Nebula Kitten Config: Using offline demo mode because Supabase keys are placeholders.");
+        // Create a fake mock object so functions don't crash when clicked
+        supabase = {
+            from: () => ({
+                select: () => ({ not: () => ({ order: () => Promise.resolve({ data: [] }) }), order: () => Promise.resolve({ data: [] }) }),
+                insert: () => Promise.resolve({ error: null }),
+                update: () => ({ eq: () => Promise.resolve({ error: null }) })
+            })
+        };
+    } else {
+        // Initialize real client if keys look real
+        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    }
+} catch (configError) {
+    console.error("🚀 Matrix initialization caught an error:", configError.message);
 }
-
-
 
 // ====== APPLICATION RUNTIME STATE ======
 let state = {
     currentUser: null,
     activeChallenge: null
 };
+
+// ... the rest of your app.js code continues below normally ...
 
 // ====== ROUTING ROUTINES ======
 function showPage(pageId) {
