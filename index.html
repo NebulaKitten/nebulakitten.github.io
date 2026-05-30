@@ -1,249 +1,185 @@
-export default function CodingPortal() {
-  const leaderboard = [
-    { rank: 1, name: 'Aarav', xp: 2450, badge: '🏆' },
-    { rank: 2, name: 'Rohit', xp: 2200, badge: '🥈' },
-    { rank: 3, name: 'Priya', xp: 2100, badge: '🥉' },
-    { rank: 4, name: 'Ankit', xp: 1800, badge: '⭐' },
-    { rank: 5, name: 'Sneha', xp: 1650, badge: '⭐' },
-  ];
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nebula Kitten | Coding Club</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Space+Grotesk:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
 
-  const courses = [
-    {
-      title: 'Python Basics',
-      progress: 75,
-      lessons: 18,
-    },
-    {
-      title: 'Web Development',
-      progress: 50,
-      lessons: 24,
-    },
-    {
-      title: 'DSA Practice',
-      progress: 30,
-      lessons: 40,
-    },
-  ];
-
-  return (
-    <div className="min-h-screen bg-slate-950 text-white">
-      {/* Navbar */}
-      <nav className="flex items-center justify-between px-8 py-5 border-b border-slate-800 backdrop-blur-lg sticky top-0 bg-slate-950/90 z-50">
-        <div>
-          <h1 className="text-2xl font-bold text-cyan-400">CodeSphere</h1>
-          <p className="text-xs text-slate-400">Learn • Practice • Compete</p>
+    <nav class="navbar">
+        <div class="nav-logo" onclick="showPage('home')">
+            <i class="fas fa-cat cat-icon"></i>
+            <span>Nebula<span class="accent-text">Kitten</span></span>
         </div>
+        <ul class="nav-links">
+            <li onclick="showPage('home')"><i class="fas fa-home"></i> Home</li>
+            <li onclick="showPage('leaderboard')"><i class="fas fa-trophy"></i> Leaderboard</li>
+            <li id="nav-dash" onclick="showPage('dashboard')" style="display: none;"><i class="fas fa-terminal"></i> Dashboard</li>
+            <li id="nav-admin" onclick="showPage('admin')" style="display: none;"><i class="fas fa-user-shield"></i> Admin Panel</li>
+            <li id="nav-auth" onclick="showPage('auth')"><i class="fas fa-sign-in-alt"></i> Login</li>
+            <li id="nav-user" style="display: none;" class="user-profile-menu">
+                <span id="user-display-name">User</span>
+                <button onclick="logout()" class="btn-sm"><i class="fas fa-power-off"></i></button>
+            </li>
+        </ul>
+    </nav>
 
-        <div className="hidden md:flex gap-8 text-sm font-medium">
-          <a href="#home" className="hover:text-cyan-400 transition">Home</a>
-          <a href="#dashboard" className="hover:text-cyan-400 transition">Dashboard</a>
-          <a href="#leaderboard" className="hover:text-cyan-400 transition">Leaderboard</a>
-          <a href="#courses" className="hover:text-cyan-400 transition">Courses</a>
-        </div>
+    <main class="container">
 
-        <button className="bg-cyan-500 hover:bg-cyan-400 transition px-5 py-2 rounded-xl font-semibold text-slate-950 shadow-lg shadow-cyan-500/30">
-          Login
-        </button>
-      </nav>
-
-      {/* Hero Section */}
-      <section
-        id="home"
-        className="relative overflow-hidden px-8 py-24 lg:px-20"
-      >
-        <div className="absolute top-0 left-0 w-96 h-96 bg-cyan-500/20 blur-3xl rounded-full"></div>
-        <div className="absolute bottom-0 right-0 w-96 h-96 bg-purple-500/20 blur-3xl rounded-full"></div>
-
-        <div className="relative z-10 grid lg:grid-cols-2 gap-14 items-center">
-          <div>
-            <p className="inline-block px-4 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-sm mb-6">
-              🚀 Next Generation Coding Portal
-            </p>
-
-            <h1 className="text-5xl lg:text-7xl font-extrabold leading-tight mb-6">
-              Learn Coding
-              <span className="text-cyan-400"> Through XP</span>
-            </h1>
-
-            <p className="text-slate-300 text-lg leading-relaxed mb-8 max-w-xl">
-              Practice coding challenges, track your learning progress, earn XP,
-              climb the leaderboard, and compete with students worldwide.
-            </p>
-
-            <div className="flex flex-wrap gap-4">
-              <button className="bg-cyan-500 hover:bg-cyan-400 transition px-7 py-4 rounded-2xl text-slate-950 font-bold shadow-lg shadow-cyan-500/40">
-                Start Learning
-              </button>
-
-              <button className="border border-slate-700 hover:border-cyan-400 hover:text-cyan-400 transition px-7 py-4 rounded-2xl font-semibold">
-                Explore Challenges
-              </button>
+        <section id="page-home" class="page-view active">
+            <div class="hero">
+                <div class="hero-content">
+                    <h1>Where Code Meets the <span class="gradient-text">Cosmos</span></h1>
+                    <p>Join Nebula Kitten, solve interstellar programming challenges, optimize your code, and level up your galactic XP ranking.</p>
+                    <button class="btn-primary" onclick="showPage('auth')">Launch Your Journey <i class="fas fa-rocket"></i></button>
+                </div>
+                <div class="hero-visual">
+                    <div class="cosmic-cat-art">
+                        <i class="fas fa-user-astronaut astronaut-kitten"></i>
+                        <div class="nebula-glow"></div>
+                    </div>
+                </div>
             </div>
-          </div>
+        </section>
 
-          {/* Hero Card */}
-          <div className="bg-slate-900/80 border border-slate-800 rounded-3xl p-8 backdrop-blur-xl shadow-2xl">
-            <div className="flex items-center justify-between mb-8">
-              <div>
-                <p className="text-slate-400 text-sm">Current XP</p>
-                <h2 className="text-4xl font-bold text-cyan-400">2,200 XP</h2>
-              </div>
+        <section id="page-auth" class="page-view">
+            <div class="auth-container">
+                <div class="auth-tabs">
+                    <button id="tab-login" class="auth-tab active" onclick="toggleAuthMode('login')">Login</button>
+                    <button id="tab-signup" class="auth-tab" onclick="toggleAuthMode('signup')">Sign Up</button>
+                </div>
+                
+                <form id="form-login" onsubmit="handleLogin(event)" class="auth-form">
+                    <h2>Welcome Back, Captain</h2>
+                    <div class="input-group">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" id="login-email" placeholder="Space Email" required>
+                    </div>
+                    <div class="input-group">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="login-pass" placeholder="Password" required>
+                    </div>
+                    <button type="submit" class="btn-block">Engage Engine <i class="fas fa-space-shuttle"></i></button>
+                </form>
 
-              <div className="bg-cyan-500/10 border border-cyan-500/30 px-4 py-2 rounded-xl text-cyan-300 font-semibold">
-                Level 8
-              </div>
+                <form id="form-signup" onsubmit="handleSignup(event)" class="auth-form hidden">
+                    <h2>Create Cosmic Profile</h2>
+                    <div class="input-group">
+                        <i class="fas fa-user"></i>
+                        <input type="text" id="signup-name" placeholder="Coder Handle (Username)" required>
+                    </div>
+                    <div class="input-group">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" id="signup-email" placeholder="Space Email" required>
+                    </div>
+                    <div class="input-group">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="signup-pass" placeholder="Choose Password" required>
+                    </div>
+                    <div class="input-group checkbox-group">
+                        <label><input type="checkbox" id="signup-is-admin"> Secret Admin Access Token Key</label>
+                    </div>
+                    <button type="submit" class="btn-block">Initiate System <i class="fas fa-user-plus"></i></button>
+                </form>
             </div>
+        </section>
 
-            <div className="space-y-5">
-              <div>
-                <div className="flex justify-between text-sm mb-2">
-                  <span>Python Mastery</span>
-                  <span>75%</span>
-                </div>
-                <div className="w-full bg-slate-800 rounded-full h-3 overflow-hidden">
-                  <div className="bg-cyan-400 h-3 rounded-full w-[75%]"></div>
-                </div>
-              </div>
-
-              <div>
-                <div className="flex justify-between text-sm mb-2">
-                  <span>Web Development</span>
-                  <span>50%</span>
-                </div>
-                <div className="w-full bg-slate-800 rounded-full h-3 overflow-hidden">
-                  <div className="bg-purple-400 h-3 rounded-full w-[50%]"></div>
-                </div>
-              </div>
-
-              <div>
-                <div className="flex justify-between text-sm mb-2">
-                  <span>DSA Practice</span>
-                  <span>30%</span>
-                </div>
-                <div className="w-full bg-slate-800 rounded-full h-3 overflow-hidden">
-                  <div className="bg-pink-400 h-3 rounded-full w-[30%]"></div>
-                </div>
-              </div>
+        <section id="page-leaderboard" class="page-view">
+            <div class="section-header">
+                <h2><i class="fas fa-crown gold"></i> Galactic Leaderboard</h2>
+                <p>Top coding kittens ranked by code correctness, elegance, and total XP.</p>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Dashboard Section */}
-      <section id="dashboard" className="px-8 lg:px-20 py-16">
-        <div className="flex items-center justify-between mb-10">
-          <div>
-            <h2 className="text-4xl font-bold">Student Dashboard</h2>
-            <p className="text-slate-400 mt-2">
-              Track your coding progress and achievements.
-            </p>
-          </div>
-
-          <button className="bg-slate-900 border border-slate-800 px-5 py-3 rounded-xl hover:border-cyan-400 transition">
-            View Reports
-          </button>
-        </div>
-
-        <div className="grid lg:grid-cols-4 gap-6">
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 hover:border-cyan-400 transition">
-            <p className="text-slate-400 mb-2">Completed Challenges</p>
-            <h3 className="text-4xl font-bold text-cyan-400">48</h3>
-          </div>
-
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 hover:border-purple-400 transition">
-            <p className="text-slate-400 mb-2">Total XP Earned</p>
-            <h3 className="text-4xl font-bold text-purple-400">2,200</h3>
-          </div>
-
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 hover:border-pink-400 transition">
-            <p className="text-slate-400 mb-2">Daily Streak</p>
-            <h3 className="text-4xl font-bold text-pink-400">14 🔥</h3>
-          </div>
-
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 hover:border-green-400 transition">
-            <p className="text-slate-400 mb-2">Global Rank</p>
-            <h3 className="text-4xl font-bold text-green-400">#12</h3>
-          </div>
-        </div>
-      </section>
-
-      {/* Courses Section */}
-      <section id="courses" className="px-8 lg:px-20 py-16">
-        <div className="mb-10">
-          <h2 className="text-4xl font-bold">Your Courses</h2>
-          <p className="text-slate-400 mt-2">
-            Continue learning and unlock new achievements.
-          </p>
-        </div>
-
-        <div className="grid lg:grid-cols-3 gap-8">
-          {courses.map((course, index) => (
-            <div
-              key={index}
-              className="bg-slate-900 border border-slate-800 rounded-3xl p-6 hover:-translate-y-2 transition duration-300 shadow-xl"
-            >
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-2xl font-bold">{course.title}</h3>
-                <span className="text-cyan-400 font-semibold">
-                  {course.progress}%
-                </span>
-              </div>
-
-              <div className="w-full bg-slate-800 rounded-full h-3 mb-5 overflow-hidden">
-                <div
-                  className="bg-cyan-400 h-3 rounded-full"
-                  style={{ width: `${course.progress}%` }}
-                ></div>
-              </div>
-
-              <div className="flex justify-between text-slate-400 text-sm mb-6">
-                <span>{course.lessons} Lessons</span>
-                <span>{course.progress}/100 Progress</span>
-              </div>
-
-              <button className="w-full bg-cyan-500 hover:bg-cyan-400 transition text-slate-950 py-3 rounded-2xl font-bold">
-                Continue Course
-              </button>
+            <div class="card">
+                <table class="leaderboard-table">
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Coder</th>
+                            <th>Rank Title</th>
+                            <th>Total XP</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboard-rows">
+                        </tbody>
+                </table>
             </div>
-          ))}
-        </div>
-      </section>
+        </section>
 
-      {/* Leaderboard Section */}
-      <section id="leaderboard" className="px-8 lg:px-20 py-16 pb-24">
-        <div className="mb-10">
-          <h2 className="text-4xl font-bold">XP Leaderboard</h2>
-          <p className="text-slate-400 mt-2">
-            Top students competing in coding challenges.
-          </p>
-        </div>
-
-        <div className="bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden shadow-2xl">
-          <div className="grid grid-cols-4 bg-slate-800 px-6 py-4 font-semibold text-slate-300">
-            <div>Rank</div>
-            <div>Student</div>
-            <div>Badge</div>
-            <div>XP</div>
-          </div>
-
-          {leaderboard.map((student, index) => (
-            <div
-              key={index}
-              className="grid grid-cols-4 px-6 py-5 border-t border-slate-800 hover:bg-slate-800/40 transition"
-            >
-              <div className="font-bold text-cyan-400">#{student.rank}</div>
-              <div>{student.name}</div>
-              <div className="text-2xl">{student.badge}</div>
-              <div className="font-semibold">{student.xp} XP</div>
+        <section id="page-dashboard" class="page-view">
+            <div class="dashboard-grid">
+                <div class="dash-sidebar">
+                    <div class="profile-card card">
+                        <i class="fas fa-user-astronaut user-avatar"></i>
+                        <h3 id="dash-username">Nebula Kitten</h3>
+                        <p class="role-badge">Student Merchant</p>
+                        <div class="xp-bar-container">
+                            <span class="xp-text">Total XP: <span id="dash-xp">0</span></span>
+                        </div>
+                    </div>
+                    <div class="card challenges-list-card">
+                        <h3><i class="fas fa-tasks"></i> Missions Available</h3>
+                        <div id="dashboard-challenges-list">
+                            </div>
+                    </div>
+                </div>
+                <div class="dash-main">
+                    <div id="challenge-workspace" class="card workspace hidden">
+                        <h2 id="work-title">Select a Mission to Begin</h2>
+                        <p id="work-desc" class="challenge-desc">Pick a coding challenge from the left panel to display mission criteria.</p>
+                        <div class="points-badge">Reward: <span id="work-xp">0</span> XP</div>
+                        
+                        <div class="editor-container">
+                            <div class="editor-header">
+                                <span><i class="fas fa-code"></i> main.js</span>
+                            </div>
+                            <textarea id="student-code-input" placeholder="// Write your solution here...&#10;function solve() {&#10;&#10;}"></textarea>
+                        </div>
+                        <button class="btn-primary" onclick="submitChallengeSolution()">Transmit Code <i class="fas fa-paper-plane"></i></button>
+                    </div>
+                    <div id="workspace-placeholder" class="card workspace empty-state">
+                        <i class="fas fa-satellite-dish massive-icon"></i>
+                        <h2>No Mission Selected</h2>
+                        <p>Select a transmission from the left terminal deck to start compiling code solutions.</p>
+                    </div>
+                </div>
             </div>
-          ))}
-        </div>
-      </section>
+        </section>
 
-      {/* Footer */}
-      <footer className="border-t border-slate-800 px-8 lg:px-20 py-8 text-center text-slate-500">
-        <p>© 2026 CodeSphere Coding Portal • Built for Future Programmers</p>
-      </footer>
-    </div>
-  );
-}
+        <section id="page-admin" class="page-view">
+            <div class="admin-grid">
+                <div class="card">
+                    <h2><i class="fas fa-plus-circle"></i> Broadcast New Challenge</h2>
+                    <form onsubmit="adminCreateChallenge(event)">
+                        <div class="form-group">
+                            <label>Mission Title</label>
+                            <input type="text" id="admin-ch-title" required placeholder="e.g., Quantum Reversal String">
+                        </div>
+                        <div class="form-group">
+                            <label>Mission Description / Prompts</label>
+                            <textarea id="admin-ch-desc" required placeholder="Describe constraints, input formats, and test goals..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>XP Allotment</label>
+                            <input type="number" id="admin-ch-xp" required min="10" placeholder="150">
+                        </div>
+                        <button type="submit" class="btn-primary btn-block">Deploy Mission <i class="fas fa-globe"></i></button>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <h2><i class="fas fa-hourglass-half"></i> Incoming Submissions Queue</h2>
+                    <div id="admin-submissions-queue" class="queue-list">
+                        </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>
