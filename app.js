@@ -5,6 +5,22 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 
 const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+
+
+
+let supabase;
+
+// This safety check prevents the script from crashing if keys are blank placeholders
+if (SUPABASE_URL.startsWith('YOUR_') || SUPABASE_ANON_KEY.startsWith('YOUR_')) {
+    console.warn("⚠️ Nebula Kitten Warning: Supabase credentials missing. Cloud operations will fail, but local navigation will work!");
+    // Dummy fallback object so the rest of your functions don't throw syntax errors
+    supabase = { from: () => ({ select: () => ({ order: () => ({}) }), insert: () => ({}) }) };
+} else {
+    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+}
+
+
+
 // ====== APPLICATION RUNTIME STATE ======
 let state = {
     currentUser: null,
