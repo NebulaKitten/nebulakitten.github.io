@@ -1,42 +1,36 @@
-// ====== SUPABASE CONFIGURATION ======
-const SUPABASE_URL = 'https://baeclleekyftgvnlqyts.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJhZWNsbGVla3lmdGd2bmxxeXRzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxMzc0OTgsImV4cCI6MjA5NTcxMzQ5OH0.qoFHZ7m813hr1hFZ9oH_89k-75wqep6oS3mY28yGCs4';
+// ====== SYSTEM CORE DATABASE INITIALIZATION ======
+const DB_PREFIX = "nebulakitten_";
 
-let supabase;
-
-try {
-    // 1. Check if the Supabase CDN script actually loaded in the HTML
-    if (typeof window.supabase === 'undefined') {
-        console.warn("⚠️ Nebula Kitten Warning: Supabase CDN script is missing from index.html! Running in offline demo mode.");
-        createMockSupabase();
-    } 
-    // 2. Check if you are still using placeholder keys
-    else if (SUPABASE_URL.startsWith('YOUR_') || !SUPABASE_URL) {
-        console.warn("   Nebula Kitten Config: Keys are placeholders. Running in offline demo mode.");
-        createMockSupabase();
-    } 
-    // 3. Excellent, everything is present! Initialize real cloud connection.
-    else {
-        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        console.log("🌌 Nebula Kitten: Cloud database connected successfully.");
-    }
-} catch (err) {
-    console.error("Initialization error:", err.message);
-    createMockSupabase();
+function getDB(key, defaultVal = []) {
+    const data = localStorage.getItem(DB_PREFIX + key);
+    return data ? JSON.parse(data) : defaultVal;
 }
 
-// Fallback generator to keep the UI working even without database keys
-function createMockSupabase() {
-    supabase = {
-        from: () => ({
-            select: () => ({ 
-                not: () => ({ order: () => Promise.resolve({ data: [] }) }), 
-                order: () => Promise.resolve({ data: [] }) 
-            }),
-            insert: () => Promise.resolve({ error: null }),
-            update: () => ({ eq: () => Promise.resolve({ error: null }) })
-        })
-    };
+function setDB(key, data) {
+    localStorage.setItem(DB_PREFIX + key, JSON.stringify(data));
+}
+
+// Seed Mock Starting Data if Empty
+if (getDB('users').length === 0) {
+    // Standard Admin Seed Account
+    const defaultUsers = [
+        { id: "u1", name: "Commander Meow", email: "admin@nebula.com", pass: "admin123", role: "admin", xp: 9999 },
+        { id: "u2", name: "SpacePaws", email: "student@nebula.com", pass: "student123", role: "student", xp: 250 },
+        { id: "u3", name: "CyberCat", email: "cyber@nebula.com", pass: "password", role: "student", xp: 120 }
+    ];
+    // Standard Challenges Seed
+    const defaultChallenges = [
+        { id: "c1", title: "The Hyperdrive Inversion", desc: "Write a function solve(str) that reverses an engineering sequence code array string. Input: 'nebula' -> Output: 'aluben'", xp: 100 },
+        { id: "c2", title: "Solar Flare Filter", desc: "Write a function solve(arr) that filters out all radiation array integers that scale above 500 lumens.", xp: 150 }
+    ];
+    // Queue System Seed
+    const defaultSubmissions = [
+        { id: "s1", userId: "u3", userName: "CyberCat", challengeId: "c1", challengeTitle: "The Hyperdrive Inversion", code: "function solve(str) {\n  return str.split('').reverse().join('');\n}", status: "pending" }
+    ];
+
+    setDB('users', defaultUsers);
+    setDB('challenges', defaultChallenges);
+    setDB('submissions', defaultSubmissions);
 }
 
 // ====== APPLICATION RUNTIME STATE ======
@@ -45,27 +39,12 @@ let state = {
     activeChallenge: null
 };
 
-// ====== EXPLICIT GLOBAL BINDING ======
-// Force the browser to see showPage even if there are script loading delays
-window.showPage = showPage;
-window.toggleAuthMode = toggleAuthMode;
-window.handleLogin = handleLogin;
-window.handleSignup = handleSignup;
-window.logout = logout;
-window.submitChallengeSolution = submitChallengeSolution;
-window.adminCreateChallenge = adminCreateChallenge;
-window.evaluateSubmission = evaluateSubmission;
-
-// ... Your remaining functions (showPage, handleLogin, etc.) stay exactly the same below ...
-
-// ... the rest of your app.js code continues below normally ...
-
 // ====== ROUTING ROUTINES ======
 function showPage(pageId) {
     document.querySelectorAll('.page-view').forEach(p => p.classList.remove('active'));
     document.getElementById(`page-${pageId}`).classList.add('active');
     
-    // Asynchronous UI loaders
+    // Custom View Lifecycle Actions
     if (pageId === 'leaderboard') renderLeaderboard();
     if (pageId === 'dashboard') renderDashboard();
     if (pageId === 'admin') renderAdminPanel();
@@ -86,70 +65,47 @@ function toggleAuthMode(mode) {
 }
 
 // ====== USER AUTHENTICATION CONTROLLERS ======
-async function handleLogin(e) {
+function handleLogin(e) {
     e.preventDefault();
     const email = document.getElementById('login-email').value;
     const pass = document.getElementById('login-pass').value;
     
-    try {
-        // Query database for matching user profile
-        const { data: user, error } = await supabase
-            .from('users')
-            .select('*')
-            .eq('email', email)
-            .eq('pass', pass)
-            .maybeSingle();
-
-        if (error) throw error;
-
-        if (user) {
-            authenticateUserSession(user);
-        } else {
-            alert("Invalid coordinate transmissions (Email/Password mismatch).");
-        }
-    } catch (err) {
-        console.error("Login Matrix Error:", err.message);
-        alert("Transmission breakdown connecting to Supabase cloud network.");
+    const users = getDB('users');
+    const user = users.find(u => u.email === email && u.pass === pass);
+    
+    if (user) {
+        authenticateUserSession(user);
+    } else {
+        alert("Invalid coordinate transmissions (Email/Password mismatch). Try admin@nebula.com / admin123");
     }
 }
 
-async function handleSignup(e) {
+function handleSignup(e) {
     e.preventDefault();
     const name = document.getElementById('signup-name').value;
     const email = document.getElementById('signup-email').value;
     const pass = document.getElementById('signup-pass').value;
     const isAdminChecked = document.getElementById('signup-is-admin').checked;
     
-    try {
-        // Double check if account handle or email exists
-        const { data: existingUser } = await supabase
-            .from('users')
-            .select('email')
-            .eq('email', email)
-            .maybeSingle();
-
-        if (existingUser) {
-            alert("Email already registered inside database matrix.");
-            return;
-        }
-
-        const newUser = {
-            name: name,
-            email: email,
-            pass: pass, // Note: In production development, use Supabase Auth for encrypted passwords
-            role: isAdminChecked ? "admin" : "student",
-            xp: 0
-        };
-        
-        const { error } = await supabase.from('users').insert([newUser]);
-        if (error) throw error;
-
-        alert("Profile cataloged! Please login with your parameters.");
-        toggleAuthMode('login');
-    } catch (err) {
-        console.error("Signup Matrix Error:", err.message);
-        alert("Failed to write user initialization parameters to the cloud cloud.");
+    const users = getDB('users');
+    if (users.some(u => u.email === email)) {
+        alert("Email already registered inside database matrix.");
+        return;
     }
+
+    const newUser = {
+        id: "u_" + Date.now(),
+        name: name,
+        email: email,
+        pass: pass,
+        role: isAdminChecked ? "admin" : "student",
+        xp: 0
+    };
+    
+    users.push(newUser);
+    setDB('users', users);
+    alert("Profile cataloged! Please login with your parameters.");
+    toggleAuthMode('login');
 }
 
 function authenticateUserSession(user) {
@@ -178,77 +134,52 @@ function logout() {
     showPage('home');
 }
 
-// ====== REMOTE DATA FETCHING & RENDERING ======
-
-// 1. Leaderboard Data Fetching
-async function renderLeaderboard() {
-    try {
-        const { data: users, error } = await supabase
-            .from('users')
-            .select('*')
-            .not('role', 'eq', 'admin')
-            .order('xp', { ascending: false });
-
-        if (error) throw error;
-
-        const container = document.getElementById('leaderboard-rows');
-        container.innerHTML = '';
+// ====== RENDER PROCEDURES: LEADERBOARD ======
+function renderLeaderboard() {
+    const users = getDB('users').filter(u => u.role !== 'admin');
+    // Sort descending by total XP
+    users.sort((a, b) => b.xp - a.xp);
+    
+    const container = document.getElementById('leaderboard-rows');
+    container.innerHTML = '';
+    
+    users.forEach((user, index) => {
+        let title = "Stellar Cadet";
+        if (user.xp >= 500) title = "Nebula Specialist";
+        if (user.xp >= 1500) title = "Cosmic Architect";
         
-        users.forEach((user, index) => {
-            let title = "Stellar Cadet";
-            if (user.xp >= 500) title = "Nebula Specialist";
-            if (user.xp >= 1500) title = "Cosmic Architect";
-            
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td><strong>#${index + 1}</strong></td>
-                <td><i class="fas fa-cat accent-text"></i> ${user.name}</td>
-                <td><span class="role-badge" style="background:rgba(255, 0, 127, 0.1); color:var(--neon-pink);">${title}</span></td>
-                <td><span class="accent-text">${user.xp} XP</span></td>
-            `;
-            container.appendChild(tr);
-        });
-    } catch (err) {
-        console.error("Leaderboard Pull Failed:", err.message);
-    }
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td><strong>#${index + 1}</strong></td>
+            <td><i class="fas fa-cat accent-text"></i> ${user.name}</td>
+            <td><span class="role-badge" style="background:rgba(255, 0, 127, 0.1); color:var(--neon-pink);">${title}</span></td>
+            <td><span class="accent-text">${user.xp} XP</span></td>
+        `;
+        container.appendChild(tr);
+    });
 }
 
-// 2. Student Dashboard Mission Engine
-async function renderDashboard() {
+// ====== RENDER PROCEDURES: STUDENT DASHBOARD ======
+function renderDashboard() {
     if (!state.currentUser) return;
+    document.getElementById('dash-username').innerText = state.currentUser.name;
     
-    try {
-        // Sync fresh profile data from cloud database for XP updates
-        const { data: freshMe } = await supabase
-            .from('users')
-            .select('xp')
-            .eq('id', state.currentUser.id)
-            .single();
-
-        document.getElementById('dash-username').innerText = state.currentUser.name;
-        document.getElementById('dash-xp').innerText = freshMe ? freshMe.xp : 0;
-        
-        // Fetch published coding questions
-        const { data: challenges, error } = await supabase
-            .from('challenges')
-            .select('*')
-            .order('created_at', { ascending: false });
-
-        if (error) throw error;
-
-        const listContainer = document.getElementById('dashboard-challenges-list');
-        listContainer.innerHTML = '';
-        
-        challenges.forEach(ch => {
-            const btn = document.createElement('button');
-            btn.className = 'challenge-item-btn';
-            btn.innerHTML = `<i class="fas fa-satellite"></i> ${ch.title} <span style="float:right; color:var(--cyber-cyan);">${ch.xp} XP</span>`;
-            btn.onclick = () => selectChallengeWorkspace(ch);
-            listContainer.appendChild(btn);
-        });
-    } catch (err) {
-        console.error("Dashboard Sync Failed:", err.message);
-    }
+    // Sync current XP status
+    const users = getDB('users');
+    const currentMe = users.find(u => u.id === state.currentUser.id);
+    document.getElementById('dash-xp').innerText = currentMe ? currentMe.xp : 0;
+    
+    const challenges = getDB('challenges');
+    const listContainer = document.getElementById('dashboard-challenges-list');
+    listContainer.innerHTML = '';
+    
+    challenges.forEach(ch => {
+        const btn = document.createElement('button');
+        btn.className = 'challenge-item-btn';
+        btn.innerHTML = `<i class="fas fa-satellite"></i> ${ch.title} <span style="float:right; color:var(--cyber-cyan);">${ch.xp} XP</span>`;
+        btn.onclick = () => selectChallengeWorkspace(ch);
+        listContainer.appendChild(btn);
+    });
 }
 
 function selectChallengeWorkspace(challenge) {
@@ -262,127 +193,109 @@ function selectChallengeWorkspace(challenge) {
     document.getElementById('student-code-input').value = `// Mission Solution Structure\nfunction solve() {\n    // Code here\n}`;
 }
 
-async function submitChallengeSolution() {
+function submitChallengeSolution() {
     const codeText = document.getElementById('student-code-input').value;
+    const submissions = getDB('submissions');
     
     const newSubmission = {
-        user_id: state.currentUser.id,
-        challenge_id: state.activeChallenge.id,
+        id: "s_" + Date.now(),
+        userId: state.currentUser.id,
+        userName: state.currentUser.name,
+        challengeId: state.activeChallenge.id,
+        challengeTitle: state.activeChallenge.title,
         code: codeText,
         status: "pending"
     };
     
-    try {
-        const { error } = await supabase.from('submissions').insert([newSubmission]);
-        if (error) throw error;
-
-        alert("Code packet deployed to Cloud Admin evaluation console.");
-        
-        document.getElementById('workspace-placeholder').classList.remove('hidden');
-        document.getElementById('challenge-workspace').classList.add('hidden');
-        state.activeChallenge = null;
-    } catch (err) {
-        console.error("Submission Upload Failed:", err.message);
-        alert("Failed to push submission file over cloud telemetry.");
-    }
+    submissions.push(newSubmission);
+    setDB('submissions', submissions);
+    alert("Code packet deployed to Admin evaluation console.");
+    
+    // Return view state
+    document.getElementById('workspace-placeholder').classList.remove('hidden');
+    document.getElementById('challenge-workspace').classList.add('hidden');
+    state.activeChallenge = null;
 }
 
-// ====== ADMIN CONSOLE INTERFACES ======
-async function adminCreateChallenge(e) {
+// ====== RENDER PROCEDURES: ADMIN PANEL CONTROL ======
+function adminCreateChallenge(e) {
     e.preventDefault();
     const title = document.getElementById('admin-ch-title').value;
     const desc = document.getElementById('admin-ch-desc').value;
     const xp = parseInt(document.getElementById('admin-ch-xp').value);
     
-    const newChallenge = { title, desc, xp };
+    const challenges = getDB('challenges');
+    challenges.push({
+        id: "c_" + Date.now(),
+        title: title,
+        desc: desc,
+        xp: xp
+    });
     
-    try {
-        const { error } = await supabase.from('challenges').insert([newChallenge]);
-        if (error) throw error;
-
-        alert("New challenge added to global cloud mission directories.");
-        e.target.reset();
-    } catch (err) {
-        console.error("Challenge Creation Failed:", err.message);
-    }
+    setDB('challenges', challenges);
+    alert("New challenge added to global mission directories.");
+    e.target.reset();
+    renderDashboard();
 }
 
-async function renderAdminPanel() {
-    try {
-        // Fetch pending submissions joined with user names and challenge descriptions
-        const { data: submissions, error } = await supabase
-            .from('submissions')
-            .select(`
-                id, code, status, user_id, challenge_id,
-                users ( name ),
-                challenges ( title, xp )
-            `)
-            .eq('status', 'pending');
+function renderAdminPanel() {
+    const submissions = getDB('submissions').filter(s => s.status === 'pending');
+    const container = document.getElementById('admin-submissions-queue');
+    container.innerHTML = '';
+    
+    if (submissions.length === 0) {
+        container.innerHTML = '<p style="color:var(--text-muted); text-align:center; padding-top:20px;">All code queues cleared.</p>';
+        return;
+    }
+    
+    submissions.forEach(sub => {
+        const item = document.createElement('div');
+        item.className = 'queue-item';
+        item.innerHTML = `
+            <div class="queue-header">
+                <strong>${sub.userName} -> ${sub.challengeTitle}</strong>
+                <span style="color:var(--cyber-cyan);">Pending Evaluation</span>
+            </div>
+            <pre class="queue-code">${escapeHTML(sub.code)}</pre>
+            <div class="queue-actions">
+                <button class="btn-approve" onclick="evaluateSubmission('${sub.id}', 'approve')"><i class="fas fa-check"></i> Approve & Award XP</button>
+                <button class="btn-reject" onclick="evaluateSubmission('${sub.id}', 'reject')"><i class="fas fa-times"></i> Reject Solution</button>
+            </div>
+        `;
+        container.appendChild(item);
+    });
+}
 
-        if (error) throw error;
-
-        const container = document.getElementById('admin-submissions-queue');
-        container.innerHTML = '';
+function evaluateSubmission(subId, decision) {
+    let submissions = getDB('submissions');
+    let users = getDB('users');
+    const targetSub = submissions.find(s => s.id === subId);
+    
+    if (!targetSub) return;
+    
+    if (decision === 'approve') {
+        const challenges = getDB('challenges');
+        const originalChallenge = challenges.find(c => c.id === targetSub.challengeId);
+        const addedXP = originalChallenge ? originalChallenge.xp : 50;
         
-        if (!submissions || submissions.length === 0) {
-            container.innerHTML = '<p style="color:var(--text-muted); text-align:center; padding-top:20px;">All code queues cleared.</p>';
-            return;
-        }
-        
-        submissions.forEach(sub => {
-            const item = document.createElement('div');
-            item.className = 'queue-item';
-            item.innerHTML = `
-                <div class="queue-header">
-                    <strong>${sub.users?.name || 'Unknown Coder'} -> ${sub.challenges?.title || 'Unknown Mission'}</strong>
-                    <span style="color:var(--cyber-cyan);">${sub.challenges?.xp || 0} XP Weight</span>
-                </div>
-                <pre class="queue-code">${escapeHTML(sub.code)}</pre>
-                <div class="queue-actions">
-                    <button class="btn-approve" onclick="evaluateSubmission('${sub.id}', 'approve', '${sub.user_id}', ${sub.challenges?.xp || 0})"><i class="fas fa-check"></i> Approve & Award XP</button>
-                    <button class="btn-reject" onclick="evaluateSubmission('${sub.id}', 'reject')"><i class="fas fa-times"></i> Reject Solution</button>
-                </div>
-            `;
-            container.appendChild(item);
+        // Find student and add XP
+        users = users.map(u => {
+            if (u.id === targetSub.userId) {
+                return { ...u, xp: (u.xp || 0) + addedXP };
+            }
+            return u;
         });
-    } catch (err) {
-        console.error("Failed to compile admin queue:", err.message);
+        setDB('users', users);
+        alert(`Solution Approved! Granted XP to ${targetSub.userName}.`);
+    } else {
+        alert(`Solution rejected.`);
     }
-}
-
-async function evaluateSubmission(subId, decision, studentId, challengeXP) {
-    try {
-        if (decision === 'approve') {
-            // 1. Fetch current student's points total
-            const { data: studentProfile } = await supabase
-                .from('users')
-                .select('xp')
-                .eq('id', studentId)
-                .single();
-
-            const currentXP = studentProfile ? studentProfile.xp : 0;
-            const absoluteNewXP = currentXP + challengeXP;
-
-            // 2. Grant computed XP points balance adjustments
-            await supabase
-                .from('users')
-                .update({ xp: absoluteNewXP })
-                .eq('id', studentId);
-        }
-
-        // 3. Mark resolution parameter choices directly on the element entry
-        const { error } = await supabase
-            .from('submissions')
-            .update({ status: decision })
-            .eq('id', subId);
-
-        if (error) throw error;
-
-        alert(`Solution evaluated and finalized successfully.`);
-        renderAdminPanel();
-    } catch (err) {
-        console.error("Evaluation update operation exception:", err.message);
-    }
+    
+    // Remove or change status of processed records
+    submissions = submissions.map(s => s.id === subId ? { ...s, status: decision } : s);
+    setDB('submissions', submissions);
+    
+    renderAdminPanel();
 }
 
 function escapeHTML(str) {
