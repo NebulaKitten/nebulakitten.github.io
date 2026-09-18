@@ -3,185 +3,513 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nebula Kitten | Coding Club</title>
-    <link rel="stylesheet" href="style.css">
+    <title>PyQuest - Learn Python Free</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Pyodide (Python in WebAssembly) -->
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
+    <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Space+Grotesk:wght@400;600&display=swap" rel="stylesheet">
-   
+    <style>
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #1f2937; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #374151; border-radius: 4px; }
+    </style>
 </head>
-<body>
+<body class="bg-gray-900 text-gray-100 font-sans min-h-screen flex flex-col">
 
-    <nav class="navbar">
-        <div class="nav-logo" onclick="showPage('home')">
-            <i class="fas fa-cat cat-icon"></i>
-            <span>Nebula<span class="accent-text">Kitten</span></span>
+    <!-- Top Navigation Bar -->
+    <nav class="bg-gray-800 border-b border-gray-700 px-6 py-3 flex justify-between items-center sticky top-0 z-50">
+        <div class="flex items-center gap-3 cursor-pointer" onclick="switchTab('dashboard')">
+            <i class="fa-solid fa-code-square text-emerald-400 text-2xl"></i>
+            <span class="font-bold text-xl tracking-wide text-white">PyQuest</span>
         </div>
-        <ul class="nav-links">
-            <li onclick="showPage('home')"><i class="fas fa-home"></i> Home</li>
-            <li onclick="showPage('leaderboard')"><i class="fas fa-trophy"></i> Leaderboard</li>
-            <li id="nav-dash" onclick="showPage('dashboard')" style="display: none;"><i class="fas fa-terminal"></i> Dashboard</li>
-            <li id="nav-admin" onclick="showPage('admin')" style="display: none;"><i class="fas fa-user-shield"></i> Admin Panel</li>
-            <li id="nav-auth" onclick="showPage('auth')"><i class="fas fa-sign-in-alt"></i> Login</li>
-            <li id="nav-user" style="display: none;" class="user-profile-menu">
-                <span id="user-display-name">User</span>
-                <button onclick="logout()" class="btn-sm"><i class="fas fa-power-off"></i></button>
-            </li>
-        </ul>
+        
+        <!-- Navigation Links -->
+        <div class="flex items-center gap-6">
+            <button onclick="switchTab('dashboard')" class="nav-btn font-medium hover:text-emerald-400 text-gray-300 transition" id="nav-dashboard">
+                <i class="fa-solid fa-house mr-1"></i> Dashboard
+            </button>
+            <button onclick="switchTab('challenges')" class="nav-btn font-medium hover:text-emerald-400 text-gray-300 transition" id="nav-challenges">
+                <i class="fa-solid fa-trophy mr-1"></i> Challenges
+            </button>
+            <button onclick="switchTab('sandbox')" class="nav-btn font-medium hover:text-emerald-400 text-gray-300 transition" id="nav-sandbox">
+                <i class="fa-solid fa-terminal mr-1"></i> Code Sandbox
+            </button>
+            <button onclick="switchTab('leaderboard')" class="nav-btn font-medium hover:text-emerald-400 text-gray-300 transition" id="nav-leaderboard">
+                <i class="fa-solid fa-ranking-star mr-1"></i> Leaderboard
+            </button>
+        </div>
+
+        <!-- User Stats Pill -->
+        <div class="flex items-center gap-4 bg-gray-900 border border-gray-700 rounded-full px-4 py-1.5 text-sm">
+            <div class="flex items-center gap-1.5 text-amber-400" title="Streak">
+                <i class="fa-solid fa-fire"></i>
+                <span id="stat-streak" class="font-bold">1</span>d
+            </div>
+            <div class="h-4 w-[1px] bg-gray-700"></div>
+            <div class="flex items-center gap-1.5 text-emerald-400" title="Experience Points">
+                <i class="fa-solid fa-bolt"></i>
+                <span id="stat-xp" class="font-bold">0</span> XP
+            </div>
+            <div class="h-4 w-[1px] bg-gray-700"></div>
+            <div class="flex items-center gap-1.5 text-purple-400" title="User Level">
+                <i class="fa-solid fa-crown"></i>
+                Lvl <span id="stat-level" class="font-bold">1</span>
+            </div>
+        </div>
     </nav>
 
-    <main class="container">
+    <!-- Main Content Containers -->
+    <main class="flex-1 p-6 max-w-7xl mx-auto w-full">
 
-        <section id="page-home" class="page-view active">
-            <div class="hero">
-                <div class="hero-content">
-                    <h1>Where Code Meets the <span class="gradient-text">Cosmos</span></h1>
-                    <p>Join Nebula Kitten, solve interstellar programming challenges, optimize your code, and level up your galactic XP ranking.</p>
-                    <button class="btn-primary" onclick="showPage('auth')">Launch Your Journey <i class="fas fa-rocket"></i></button>
+        <!-- DASHBOARD TAB -->
+        <section id="tab-dashboard" class="tab-content space-y-6">
+            <div class="bg-gradient-to-r from-emerald-900/40 to-indigo-900/40 border border-gray-700 rounded-2xl p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <h1 class="text-3xl font-bold text-white mb-1">Welcome Back, Coder! 🚀</h1>
+                    <p class="text-gray-400">Master Python fundamentals by solving hands-on challenges.</p>
                 </div>
-                <div class="hero-visual">
-                    <div class="cosmic-cat-art">
-                        <i class="fas fa-user-astronaut astronaut-kitten"></i>
-                        <div class="nebula-glow"></div>
+                <button onclick="switchTab('challenges')" class="bg-emerald-500 hover:bg-emerald-600 text-gray-900 font-bold px-6 py-3 rounded-xl transition shadow-lg shadow-emerald-500/20 flex items-center gap-2">
+                    <i class="fa-solid fa-play"></i> Continue Learning
+                </button>
+            </div>
+
+            <!-- Progress Overview -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-gray-800 border border-gray-700 p-5 rounded-xl">
+                    <div class="text-gray-400 text-sm mb-1">Level Progress</div>
+                    <div class="flex justify-between items-end mb-2">
+                        <span class="text-2xl font-bold" id="dash-level-title">Level 1 Novice</span>
+                        <span class="text-xs text-gray-400" id="dash-xp-progress">0 / 100 XP</span>
+                    </div>
+                    <div class="w-full bg-gray-700 rounded-full h-2.5 overflow-hidden">
+                        <div id="dash-xp-bar" class="bg-emerald-500 h-2.5 rounded-full transition-all duration-500" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <div class="bg-gray-800 border border-gray-700 p-5 rounded-xl">
+                    <div class="text-gray-400 text-sm mb-1">Solved Challenges</div>
+                    <div class="text-2xl font-bold text-white" id="dash-solved-count">0 / 3</div>
+                    <div class="text-xs text-emerald-400 mt-2 flex items-center gap-1">
+                        <i class="fa-solid fa-circle-check"></i> Python Basics Track
+                    </div>
+                </div>
+
+                <div class="bg-gray-800 border border-gray-700 p-5 rounded-xl">
+                    <div class="text-gray-400 text-sm mb-1">Python Engine Status</div>
+                    <div id="engine-status" class="text-amber-400 font-bold flex items-center gap-2 mt-1">
+                        <i class="fa-solid fa-circle-notch fa-spin"></i> Initializing Pyodide...
+                    </div>
+                    <div class="text-xs text-gray-500 mt-2">Browser-based WebAssembly Python 3.11</div>
+                </div>
+            </div>
+
+            <!-- Achievement Badges -->
+            <div class="bg-gray-800 border border-gray-700 rounded-xl p-6">
+                <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-award text-amber-400"></i> Earned Badges
+                </h2>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4" id="badge-container">
+                    <!-- Badges render dynamically -->
+                </div>
+            </div>
+        </section>
+
+        <!-- CHALLENGES TAB -->
+        <section id="tab-challenges" class="tab-content hidden grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-140px)]">
+            <!-- Sidebar: Problem List -->
+            <div class="lg:col-span-4 bg-gray-800 border border-gray-700 rounded-xl flex flex-col overflow-hidden">
+                <div class="p-4 border-b border-gray-700 font-bold text-lg flex justify-between items-center">
+                    <span>Python Quests</span>
+                    <span class="text-xs bg-emerald-500/10 text-emerald-400 px-2.5 py-1 rounded-full border border-emerald-500/20">Beginner Track</span>
+                </div>
+                <div class="divide-y divide-gray-700 overflow-y-auto flex-1 custom-scrollbar" id="challenge-list">
+                    <!-- Challenge items injected here -->
+                </div>
+            </div>
+
+            <!-- Main Editor Area -->
+            <div class="lg:col-span-8 flex flex-col gap-4 h-full">
+                <div class="bg-gray-800 border border-gray-700 rounded-xl p-5 flex-1 overflow-y-auto custom-scrollbar" id="challenge-detail">
+                    <!-- Loaded challenge detail -->
+                </div>
+
+                <!-- Code Editor Container -->
+                <div class="bg-gray-800 border border-gray-700 rounded-xl flex-1 flex flex-col overflow-hidden">
+                    <div class="bg-gray-900 border-b border-gray-700 px-4 py-2 flex justify-between items-center text-xs text-gray-400">
+                        <span><i class="fa-regular fa-file-code text-emerald-400 mr-1"></i> solution.py</span>
+                        <button onclick="resetChallengeCode()" class="hover:text-white transition"><i class="fa-solid fa-rotate-left mr-1"></i> Reset Starter Code</button>
+                    </div>
+                    <textarea id="challenge-code" class="w-full flex-1 bg-gray-900 font-mono text-sm p-4 text-emerald-300 focus:outline-none resize-none" spellcheck="false"></textarea>
+                    
+                    <!-- Output Console -->
+                    <div class="bg-black/80 border-t border-gray-700 p-3 h-32 overflow-y-auto font-mono text-xs text-gray-300 custom-scrollbar" id="challenge-output">
+                        <span class="text-gray-500">// Output and validation checks will display here...</span>
+                    </div>
+
+                    <div class="p-3 bg-gray-800 border-t border-gray-700 flex justify-between items-center">
+                        <span id="challenge-status-msg" class="text-xs"></span>
+                        <button onclick="submitChallenge()" id="btn-submit" class="bg-emerald-500 hover:bg-emerald-600 text-gray-900 font-bold px-5 py-2 rounded-lg transition text-sm flex items-center gap-2">
+                            <i class="fa-solid fa-paper-plane"></i> Run & Submit
+                        </button>
                     </div>
                 </div>
             </div>
         </section>
 
-        <section id="page-auth" class="page-view">
-            <div class="auth-container">
-                <div class="auth-tabs">
-                    <button id="tab-login" class="auth-tab active" onclick="toggleAuthMode('login')">Login</button>
-                    <button id="tab-signup" class="auth-tab" onclick="toggleAuthMode('signup')">Sign Up</button>
+        <!-- CODE SANDBOX TAB -->
+        <section id="tab-sandbox" class="tab-content hidden h-[calc(100vh-140px)] flex flex-col gap-4">
+            <div class="flex justify-between items-center bg-gray-800 border border-gray-700 p-4 rounded-xl">
+                <div>
+                    <h2 class="font-bold text-lg">Python 3 Execution Environment</h2>
+                    <p class="text-xs text-gray-400">Experiment freely. Write custom Python scripts and see real-time output.</p>
                 </div>
-                
-                <form id="form-login" onsubmit="handleLogin(event)" class="auth-form">
-                    <h2>Welcome Back, Captain</h2>
-                    <div class="input-group">
-                        <i class="fas fa-envelope"></i>
-                        <input type="email" id="login-email" placeholder="Space Email" required>
-                    </div>
-                    <div class="input-group">
-                        <i class="fas fa-lock"></i>
-                        <input type="password" id="login-pass" placeholder="Password" required>
-                    </div>
-                    <button type="submit" class="btn-block">Engage Engine <i class="fas fa-space-shuttle"></i></button>
-                </form>
+                <button onclick="runSandboxCode()" class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold px-5 py-2 rounded-lg transition text-sm flex items-center gap-2">
+                    <i class="fa-solid fa-play"></i> Execute Code
+                </button>
+            </div>
 
-                <form id="form-signup" onsubmit="handleSignup(event)" class="auth-form hidden">
-                    <h2>Create Cosmic Profile</h2>
-                    <div class="input-group">
-                        <i class="fas fa-user"></i>
-                        <input type="text" id="signup-name" placeholder="Coder Handle (Username)" required>
-                    </div>
-                    <div class="input-group">
-                        <i class="fas fa-envelope"></i>
-                        <input type="email" id="signup-email" placeholder="Space Email" required>
-                    </div>
-                    <div class="input-group">
-                        <i class="fas fa-lock"></i>
-                        <input type="password" id="signup-pass" placeholder="Choose Password" required>
-                    </div>
-                    <div class="input-group checkbox-group">
-                        <label><input type="checkbox" id="signup-is-admin"> Secret Admin Access Token Key</label>
-                    </div>
-                    <button type="submit" class="btn-block">Initiate System <i class="fas fa-user-plus"></i></button>
-                </form>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 flex-1 overflow-hidden">
+                <div class="bg-gray-800 border border-gray-700 rounded-xl flex flex-col overflow-hidden">
+                    <div class="bg-gray-900 border-b border-gray-700 px-4 py-2 text-xs text-gray-400 font-mono">Editor</div>
+                    <textarea id="sandbox-code" class="w-full flex-1 bg-gray-900 font-mono text-sm p-4 text-indigo-300 focus:outline-none resize-none" spellcheck="false"># Free Code Playground
+def calculate_xp(level):
+    return level * 100
+
+print(f"Level 5 requires: {calculate_xp(5)} XP")
+</textarea>
+                </div>
+
+                <div class="bg-gray-800 border border-gray-700 rounded-xl flex flex-col overflow-hidden">
+                    <div class="bg-gray-900 border-b border-gray-700 px-4 py-2 text-xs text-gray-400 font-mono">Terminal Output</div>
+                    <pre id="sandbox-output" class="w-full flex-1 bg-black p-4 font-mono text-sm text-green-400 overflow-y-auto custom-scrollbar">Press "Execute Code" to run your script...</pre>
+                </div>
             </div>
         </section>
 
-        <section id="page-leaderboard" class="page-view">
-            <div class="section-header">
-                <h2><i class="fas fa-crown gold"></i> Galactic Leaderboard</h2>
-                <p>Top coding kittens ranked by code correctness, elegance, and total XP.</p>
-            </div>
-            <div class="card">
-                <table class="leaderboard-table">
-                    <thead>
-                        <tr>
-                            <th>Rank</th>
-                            <th>Coder</th>
-                            <th>Rank Title</th>
-                            <th>Total XP</th>
-                        </tr>
-                    </thead>
-                    <tbody id="leaderboard-rows">
+        <!-- LEADERBOARD TAB -->
+        <section id="tab-leaderboard" class="tab-content hidden space-y-6">
+            <div class="bg-gray-800 border border-gray-700 rounded-xl p-6">
+                <h2 class="text-2xl font-bold mb-2 flex items-center gap-2">
+                    <i class="fa-solid fa-ranking-star text-amber-400"></i> Student Leaderboard
+                </h2>
+                <p class="text-gray-400 text-sm mb-6">Compete with peers by completing Python challenges and earning XP.</p>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm text-gray-300">
+                        <thead class="bg-gray-900 text-gray-400 uppercase text-xs">
+                            <tr>
+                                <th class="p-4 rounded-l-lg">Rank</th>
+                                <th class="p-4">Student</th>
+                                <th class="p-4">Level</th>
+                                <th class="p-4 rounded-r-lg text-right">Total XP</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-700" id="leaderboard-rows">
+                            <!-- Leaderboard injected dynamically -->
                         </tbody>
-                </table>
-            </div>
-        </section>
-
-        <section id="page-dashboard" class="page-view">
-            <div class="dashboard-grid">
-                <div class="dash-sidebar">
-                    <div class="profile-card card">
-                        <i class="fas fa-user-astronaut user-avatar"></i>
-                        <h3 id="dash-username">Nebula Kitten</h3>
-                        <p class="role-badge">Student Merchant</p>
-                        <div class="xp-bar-container">
-                            <span class="xp-text">Total XP: <span id="dash-xp">0</span></span>
-                        </div>
-                    </div>
-                    <div class="card challenges-list-card">
-                        <h3><i class="fas fa-tasks"></i> Missions Available</h3>
-                        <div id="dashboard-challenges-list">
-                            </div>
-                    </div>
-                </div>
-                <div class="dash-main">
-                    <div id="challenge-workspace" class="card workspace hidden">
-                        <h2 id="work-title">Select a Mission to Begin</h2>
-                        <p id="work-desc" class="challenge-desc">Pick a coding challenge from the left panel to display mission criteria.</p>
-                        <div class="points-badge">Reward: <span id="work-xp">0</span> XP</div>
-                        
-                        <div class="editor-container">
-                            <div class="editor-header">
-                                <span><i class="fas fa-code"></i> main.js</span>
-                            </div>
-                            <textarea id="student-code-input" placeholder="// Write your solution here...&#10;function solve() {&#10;&#10;}"></textarea>
-                        </div>
-                        <button class="btn-primary" onclick="submitChallengeSolution()">Transmit Code <i class="fas fa-paper-plane"></i></button>
-                    </div>
-                    <div id="workspace-placeholder" class="card workspace empty-state">
-                        <i class="fas fa-satellite-dish massive-icon"></i>
-                        <h2>No Mission Selected</h2>
-                        <p>Select a transmission from the left terminal deck to start compiling code solutions.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section id="page-admin" class="page-view">
-            <div class="admin-grid">
-                <div class="card">
-                    <h2><i class="fas fa-plus-circle"></i> Broadcast New Challenge</h2>
-                    <form onsubmit="adminCreateChallenge(event)">
-                        <div class="form-group">
-                            <label>Mission Title</label>
-                            <input type="text" id="admin-ch-title" required placeholder="e.g., Quantum Reversal String">
-                        </div>
-                        <div class="form-group">
-                            <label>Mission Description / Prompts</label>
-                            <textarea id="admin-ch-desc" required placeholder="Describe constraints, input formats, and test goals..."></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label>XP Allotment</label>
-                            <input type="number" id="admin-ch-xp" required min="10" placeholder="150">
-                        </div>
-                        <button type="submit" class="btn-primary btn-block">Deploy Mission <i class="fas fa-globe"></i></button>
-                    </form>
-                </div>
-
-                <div class="card">
-                    <h2><i class="fas fa-hourglass-half"></i> Incoming Submissions Queue</h2>
-                    <div id="admin-submissions-queue" class="queue-list">
-                        </div>
+                    </table>
                 </div>
             </div>
         </section>
 
     </main>
 
-     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="app.js"></script>
+    <!-- Application JavaScript Logic -->
+    <script>
+        // 1. DATA & STATE MANAGEMENT
+        let pyodideInstance = null;
+        
+        let state = {
+            xp: 0,
+            level: 1,
+            streak: 1,
+            solvedChallenges: [],
+            badges: [
+                { id: 'first_quest', name: 'First Step', icon: 'fa-bolt', desc: 'Complete your 1st challenge', unlocked: false },
+                { id: 'master_python', name: 'Python Beginner', icon: 'fa-award', desc: 'Solve 3 Python challenges', unlocked: false },
+                { id: 'sandbox_coder', name: 'Playground Explorer', icon: 'fa-flask', desc: 'Execute code in the Sandbox', unlocked: false }
+            ]
+        };
+
+        const challenges = [
+            {
+                id: 'hello_world',
+                title: '1. Hello, World!',
+                difficulty: 'Easy',
+                xp: 50,
+                desc: 'Write a Python program that prints the exact string <code>"Hello, Python!"</code> to standard output.',
+                starterCode: '# Print "Hello, Python!" below\n',
+                testInput: '',
+                expectedOutput: 'Hello, Python!'
+            },
+            {
+                id: 'variable_math',
+                title: '2. Variable Arithmetic',
+                difficulty: 'Easy',
+                xp: 75,
+                desc: 'Create two variables: <code>a = 15</code> and <code>b = 25</code>. Print their sum.',
+                starterCode: '# Assign variables a and b, then print their sum\n',
+                testInput: '',
+                expectedOutput: '40'
+            },
+            {
+                id: 'even_odd',
+                title: '3. Even or Odd Checker',
+                difficulty: 'Medium',
+                xp: 100,
+                desc: 'Write a program that takes a variable <code>num = 7</code>. Print <code>"Odd"</code> if the number is odd, and <code>"Even"</code> if it is even.',
+                starterCode: 'num = 7\n# Write conditional logic below\n',
+                testInput: '',
+                expectedOutput: 'Odd'
+            }
+        ];
+
+        let activeChallengeId = challenges[0].id;
+
+        // Mock Leaderboard Dataset
+        const leaderboardData = [
+            { rank: 1, name: 'Aarav Sharma', level: 4, xp: 450 },
+            { rank: 2, name: 'Priya Patel', level: 3, xp: 320 },
+            { rank: 3, name: 'Ananya Gupta', level: 2, xp: 180 },
+        ];
+
+        // 2. INITIALIZATION
+        window.addEventListener('DOMContentLoaded', () => {
+            loadStateFromStorage();
+            initPyodideEngine();
+            renderDashboard();
+            renderChallengeList();
+            loadChallenge(activeChallengeId);
+            renderLeaderboard();
+        });
+
+        function loadStateFromStorage() {
+            const saved = localStorage.getItem('pyquest_user_state');
+            if (saved) {
+                state = JSON.parse(saved);
+            }
+            updateStatsUI();
+        }
+
+        function saveStateToStorage() {
+            localStorage.setItem('pyquest_user_state', JSON.stringify(state));
+            updateStatsUI();
+        }
+
+        async function initPyodideEngine() {
+            const statusEl = document.getElementById('engine-status');
+            try {
+                pyodideInstance = await loadPyodide();
+                statusEl.className = 'text-emerald-400 font-bold flex items-center gap-2 mt-1';
+                statusEl.innerHTML = '<i class="fa-solid fa-circle-check"></i> Python Engine Ready';
+            } catch (err) {
+                statusEl.className = 'text-rose-400 font-bold flex items-center gap-2 mt-1';
+                statusEl.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Engine Failed to Load';
+                console.error(err);
+            }
+        }
+
+        // 3. UI TAB NAVIGATION
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('text-emerald-400'));
+            
+            document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+            document.getElementById(`nav-${tabName}`).classList.add('text-emerald-400');
+        }
+
+        // 4. GAMIFICATION & DASHBOARD LOGIC
+        function addXP(amount) {
+            state.xp += amount;
+            state.level = Math.floor(state.xp / 100) + 1;
+            checkBadges();
+            saveStateToStorage();
+            renderDashboard();
+        }
+
+        function checkBadges() {
+            if (state.solvedChallenges.length >= 1) unlockBadge('first_quest');
+            if (state.solvedChallenges.length >= 3) unlockBadge('master_python');
+        }
+
+        function unlockBadge(badgeId) {
+            const badge = state.badges.find(b => b.id === badgeId);
+            if (badge && !badge.unlocked) {
+                badge.unlocked = true;
+                saveStateToStorage();
+            }
+        }
+
+        function updateStatsUI() {
+            document.getElementById('stat-xp').innerText = state.xp;
+            document.getElementById('stat-level').innerText = state.level;
+            document.getElementById('stat-streak').innerText = state.streak;
+        }
+
+        function renderDashboard() {
+            document.getElementById('dash-solved-count').innerText = `${state.solvedChallenges.length} / ${challenges.length}`;
+            
+            const currentLevelXp = state.xp % 100;
+            document.getElementById('dash-xp-progress').innerText = `${currentLevelXp} / 100 XP`;
+            document.getElementById('dash-xp-bar').style.width = `${currentLevelXp}%`;
+            document.getElementById('dash-level-title').innerText = `Level ${state.level} Coder`;
+
+            const badgeContainer = document.getElementById('badge-container');
+            badgeContainer.innerHTML = state.badges.map(b => `
+                <div class="border ${b.unlocked ? 'border-amber-500/40 bg-amber-500/10' : 'border-gray-700 bg-gray-900/50 opacity-50'} p-4 rounded-xl flex flex-col items-center text-center">
+                    <i class="fa-solid ${b.icon} text-2xl ${b.unlocked ? 'text-amber-400' : 'text-gray-500'} mb-2"></i>
+                    <span class="font-bold text-sm text-white">${b.name}</span>
+                    <span class="text-xs text-gray-400 mt-1">${b.desc}</span>
+                </div>
+            `).join('');
+        }
+
+        // 5. CHALLENGES ENGINE
+        function renderChallengeList() {
+            const listEl = document.getElementById('challenge-list');
+            listEl.innerHTML = challenges.map(c => {
+                const isSolved = state.solvedChallenges.includes(c.id);
+                const isActive = c.id === activeChallengeId;
+                return `
+                    <div onclick="loadChallenge('${c.id}')" class="p-4 cursor-pointer transition hover:bg-gray-700/50 ${isActive ? 'bg-gray-700/70 border-l-4 border-emerald-400' : ''}">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="font-bold text-sm ${isActive ? 'text-emerald-400' : 'text-white'}">${c.title}</span>
+                            ${isSolved ? '<i class="fa-solid fa-circle-check text-emerald-400"></i>' : ''}
+                        </div>
+                        <div class="flex gap-2 text-xs">
+                            <span class="text-amber-400 font-semibold">+${c.xp} XP</span>
+                            <span class="text-gray-400">• ${c.difficulty}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function loadChallenge(id) {
+            activeChallengeId = id;
+            renderChallengeList();
+            const ch = challenges.find(c => c.id === id);
+            
+            document.getElementById('challenge-detail').innerHTML = `
+                <div class="flex justify-between items-start mb-2">
+                    <h2 class="text-xl font-bold text-white">${ch.title}</h2>
+                    <span class="bg-amber-400/10 text-amber-400 text-xs px-2.5 py-1 rounded-full border border-amber-400/20 font-bold">+${ch.xp} XP</span>
+                </div>
+                <p class="text-gray-300 text-sm leading-relaxed mb-4">${ch.desc}</p>
+            `;
+
+            document.getElementById('challenge-code').value = ch.starterCode;
+            document.getElementById('challenge-output').innerHTML = `<span class="text-gray-500">// Ready to run...</span>`;
+            document.getElementById('challenge-status-msg').innerHTML = '';
+        }
+
+        function resetChallengeCode() {
+            const ch = challenges.find(c => c.id === activeChallengeId);
+            if (ch) document.getElementById('challenge-code').value = ch.starterCode;
+        }
+
+        async function submitChallenge() {
+            if (!pyodideInstance) {
+                alert("Python engine is still initializing. Please wait a moment.");
+                return;
+            }
+
+            const code = document.getElementById('challenge-code').value;
+            const outputEl = document.getElementById('challenge-output');
+            const statusMsg = document.getElementById('challenge-status-msg');
+            const ch = challenges.find(c => c.id === activeChallengeId);
+
+            outputEl.innerHTML = `<span class="text-amber-400">Executing and validating tests...</span>`;
+
+            try {
+                // Redirect Python stdout to string
+                pyodideInstance.runPython(`
+                    import sys
+                    import io
+                    sys.stdout = io.StringIO()
+                `);
+
+                // Run code
+                await pyodideInstance.runPythonAsync(code);
+
+                // Fetch printed result
+                let stdout = pyodideInstance.runPython(`sys.stdout.getvalue()`).trim();
+
+                outputEl.innerText = `Standard Output:\n${stdout}`;
+
+                if (stdout === ch.expectedOutput) {
+                    statusMsg.className = "text-emerald-400 font-bold text-xs";
+                    statusMsg.innerText = "✓ Test passed! Complete!";
+                    
+                    if (!state.solvedChallenges.includes(ch.id)) {
+                        state.solvedChallenges.push(ch.id);
+                        addXP(ch.xp);
+                        renderChallengeList();
+                    }
+                } else {
+                    statusMsg.className = "text-rose-400 font-bold text-xs";
+                    statusMsg.innerText = `✗ Output mismatch. Expected: "${ch.expectedOutput}"`;
+                }
+
+            } catch (err) {
+                outputEl.innerText = err.toString();
+                statusMsg.className = "text-rose-400 font-bold text-xs";
+                statusMsg.innerText = "✗ Syntax or Execution Error";
+            }
+        }
+
+        // 6. CODE SANDBOX EXECUTION
+        async function runSandboxCode() {
+            if (!pyodideInstance) {
+                alert("Python engine is still initializing. Please wait a moment.");
+                return;
+            }
+
+            const code = document.getElementById('sandbox-code').value;
+            const outputEl = document.getElementById('sandbox-output');
+            outputEl.innerText = "Running script...";
+
+            try {
+                pyodideInstance.runPython(`
+                    import sys
+                    import io
+                    sys.stdout = io.StringIO()
+                `);
+
+                await pyodideInstance.runPythonAsync(code);
+                let stdout = pyodideInstance.runPython(`sys.stdout.getvalue()`);
+
+                outputEl.innerText = stdout || "[Execution completed with no printed output]";
+                unlockBadge('sandbox_coder');
+            } catch (err) {
+                outputEl.innerText = err.toString();
+            }
+        }
+
+        // 7. LEADERBOARD RENDER
+        function renderLeaderboard() {
+            const rowsEl = document.getElementById('leaderboard-rows');
+            
+            // Build dynamic list including user
+            let allUsers = [...leaderboardData];
+            allUsers.push({ rank: 0, name: 'You (Current Student)', level: state.level, xp: state.xp, isUser: true });
+            
+            allUsers.sort((a, b) => b.xp - a.xp);
+            allUsers.forEach((u, index) => u.rank = index + 1);
+
+            rowsEl.innerHTML = allUsers.map(u => `
+                <tr class="${u.isUser ? 'bg-emerald-500/10 font-bold text-emerald-300' : 'hover:bg-gray-800/50'}">
+                    <td class="p-4">
+                        ${u.rank === 1 ? '🥇' : u.rank === 2 ? '🥈' : u.rank === 3 ? '🥉' : `#${u.rank}`}
+                    </td>
+                    <td class="p-4">${u.name}</td>
+                    <td class="p-4">Lvl ${u.level}</td>
+                    <td class="p-4 text-right font-mono text-amber-400">${u.xp} XP</td>
+                </tr>
+            `).join('');
+        }
+    </script>
 </body>
 </html>
